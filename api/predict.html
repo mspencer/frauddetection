@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Prediction Client</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            height: 350px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            align-self: flex-start;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .response-box {
+            min-height: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            border: 1px solid #181a1f;
+        }
+        .error {
+            color: #ff6b6b;
+            background-color: #fce8e6;
+            border: 1px solid #ff6b6b;
+        }
+        .success {
+            border-left: 5px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Fraud Prediction API Test Client</h2>
+    
+    <div class="container">
+        <div class="form-group">
+            <label for="payloadInput">JSON Payload:</label>
+            <textarea id="payloadInput" placeholder="Paste your JSON payload here...">{
+    "Time": 0.0,
+    "V1": 1.191857111,
+    "V2": 0.266150712,
+    "V3": 0.166480113,
+    "V4": 0.448154078,
+    "V5": 0.060017649,
+    "V6": -0.082360809,
+    "V7": -0.078802983,
+    "V8": 0.085101655,
+    "V9": -0.255425128,
+    "V10": -0.166974414,
+    "V11": 1.612726661,
+    "V12": 1.065235311,
+    "V13": 0.489095016,
+    "V14": -0.143772296,
+    "V15": 0.635558093,
+    "V16": 0.463917041,
+    "V17": -0.114804663,
+    "V18": -0.18336127,
+    "V19": -0.145783041,
+    "V20": -0.069083135,
+    "V21": -0.225775248,
+    "V22": -0.638671953,
+    "V23": 0.101288021,
+    "V24": -0.339846476,
+    "V25": 0.167170404,
+    "V26": 0.125894532,
+    "V27": -0.008983099,
+    "V28": 0.014724169,
+    "Amount": 2.69,
+    "Class": 0.0
+}</textarea>
+        </div>
+
+        <button id="submitBtn" onclick="sendPredictionRequest()">Send POST Request</button>
+
+        <div class="form-group">
+            <label>API Response:</label>
+            <div id="responseOutput" class="response-box">The API response will appear here after you click the button.</div>
+        </div>
+    </div>
+
+    <script>
+        async function sendPredictionRequest() {
+            const endpoint = "http://localhost:8000/v1/predict";
+            const payloadTextArea = document.getElementById("payloadInput");
+            const responseOutput = document.getElementById("responseOutput");
+            const submitBtn = document.getElementById("submitBtn");
+
+            // Reset UI state
+            responseOutput.classList.remove("error", "success");
+            responseOutput.textContent = "Sending request...";
+            submitBtn.disabled = true;
+
+            let parsedPayload;
+
+            // Validate if the input text is a valid JSON format
+            try {
+                parsedPayload = JSON.parse(payloadTextArea.value);
+            } catch (jsonError) {
+                responseOutput.classList.add("error");
+                responseOutput.textContent = `Local Validation Error: Invalid JSON Format.\n\n${jsonError.message}`;
+                submitBtn.disabled = false;
+                return;
+            }
+
+            // Perform the asynchronous POST fetch call
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(parsedPayload)
+                });
+
+                // Read response text (handles both JSON or raw text responses)
+                const responseText = await response.text();
+                
+                if (response.ok) {
+                    responseOutput.classList.add("success");
+                    // Try to pretty-print if the response is JSON, otherwise show raw text
+                    try {
+                        const formattedJson = JSON.stringify(JSON.parse(responseText), null, 4);
+                        responseOutput.textContent = formattedJson;
+                    } catch {
+                        responseOutput.textContent = `Status: ${response.status}\n\n${responseText}`;
+                    }
+                } else {
+                    responseOutput.classList.add("error");
+                    responseOutput.textContent = `Server Error (Status ${response.status}):\n\n${responseText}`;
+                }
+
+            } catch (networkError) {
+                responseOutput.classList.add("error");
+                responseOutput.textContent = `Network/CORS Error: Could not connect to the API server.\n\nDetails: ${networkError.message}`;
+            } finally {
+                // Re-enable the button
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

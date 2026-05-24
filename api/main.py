@@ -8,6 +8,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 from fastapi import FastAPI, HTTPException, status, Body
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, create_model
 
 import csv
@@ -45,6 +46,7 @@ PredictRequest = create_model(
 class PredictResponse(BaseModel):
     probability_fraud: float
     predicted_fraud: int
+    threshold: float
 
 class HealthResponse(BaseModel):
     ok: bool
@@ -53,6 +55,7 @@ app = FastAPI(title="Fraud prediction API")
 
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
+    print('in health')
     return HealthResponse(ok=True)
 
 @app.post("/v1/predict", response_model=PredictResponse)
@@ -61,7 +64,7 @@ def predict(body: PredictRequest) -> PredictResponse:  # type: ignore[valid-type
     X = np.array([row], dtype=np.float32)
     proba = float(model.predict_proba(X)[0, _proba_col])
     label = int(proba >= threshold)
-    return PredictResponse(probability_fraud=proba, predicted_fraud=label)
+    return PredictResponse(probability_fraud=proba, predicted_fraud=label, threshold=threshold)
 
 @app.post("/v1/dict-from-string")
 def build_dict_from_string(
@@ -101,3 +104,9 @@ def build_dict_from_string(
                 print(f"Cound not convert '{value}' to a float.")
     
     return { "data": dict_response}
+
+@app.get("/testpage")
+async def serve_index():
+    # Looks for 'index.html' in the same folder as main.py
+    file_path = _BASE / "test.html"
+    return FileResponse(file_path)
