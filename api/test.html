@@ -6,83 +6,36 @@
     <title>Fraud Prediction Client</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             max-width: 800px;
             margin: 40px auto;
             padding: 0 20px;
             background-color: #f9f9f9;
             color: #333;
         }
-        h2 {
-            color: #2c3e50;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        label {
-            font-weight: bold;
-            color: #555;
-        }
+        h2 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .container { display: flex; flex-direction: column; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-weight: bold; color: #555; }
         textarea {
-            width: 100%;
-            height: 350px;
-            font-family: "Courier New", Courier, monospace;
-            font-size: 14px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            background-color: #fff;
+            width: 100%; height: 350px; font-family: monospace; font-size: 14px;
+            padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
         }
         button {
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            color: white;
-            background-color: #007bff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            padding: 12px 24px; font-size: 16px; font-weight: bold; color: white;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer;
             align-self: flex-start;
         }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
         .response-box {
-            min-height: 100px;
-            max-height: 400px;
-            overflow-y: auto;
-            background-color: #282c34;
-            color: #abb2bf;
-            padding: 15px;
-            border-radius: 4px;
-            font-family: "Courier New", Courier, monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-            border: 1px solid #181a1f;
+            min-height: 100px; max-height: 400px; overflow-y: auto;
+            background-color: #282c34; color: #abb2bf; padding: 15px;
+            border-radius: 4px; font-family: monospace; white-space: pre-wrap;
+            word-break: break-all; border: 1px solid #181a1f;
         }
-        .error {
-            color: #ff6b6b;
-            background-color: #fce8e6;
-            border: 1px solid #ff6b6b;
-        }
-        .success {
-            border-left: 5px solid #28a745;
-        }
+        .error { color: #ff6b6b; background-color: #fce8e6; border: 1px solid #ff6b6b; }
+        .success { border-left: 5px solid #28a745; }
     </style>
 </head>
 <body>
@@ -92,7 +45,7 @@
     <div class="container">
         <div class="form-group">
             <label for="payloadInput">JSON Payload:</label>
-            <textarea id="payloadInput" placeholder="Paste your JSON payload here...">{
+            <textarea id="payloadInput">{
     "Time": 0.0,
     "V1": 1.191857111,
     "V2": 0.266150712,
@@ -142,14 +95,11 @@
             const responseOutput = document.getElementById("responseOutput");
             const submitBtn = document.getElementById("submitBtn");
 
-            // Reset UI state
             responseOutput.classList.remove("error", "success");
             responseOutput.textContent = "Sending request...";
             submitBtn.disabled = true;
 
             let parsedPayload;
-
-            // Validate if the input text is a valid JSON format
             try {
                 parsedPayload = JSON.parse(payloadTextArea.value);
             } catch (jsonError) {
@@ -159,25 +109,19 @@
                 return;
             }
 
-            // Perform the asynchronous POST fetch call
             try {
                 const response = await fetch(endpoint, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(parsedPayload)
                 });
 
-                // Read response text (handles both JSON or raw text responses)
                 const responseText = await response.text();
                 
                 if (response.ok) {
                     responseOutput.classList.add("success");
-                    // Try to pretty-print if the response is JSON, otherwise show raw text
                     try {
-                        const formattedJson = JSON.stringify(JSON.parse(responseText), null, 4);
-                        responseOutput.textContent = formattedJson;
+                        responseOutput.textContent = JSON.stringify(JSON.parse(responseText), null, 4);
                     } catch {
                         responseOutput.textContent = `Status: ${response.status}\n\n${responseText}`;
                     }
@@ -185,12 +129,10 @@
                     responseOutput.classList.add("error");
                     responseOutput.textContent = `Server Error (Status ${response.status}):\n\n${responseText}`;
                 }
-
             } catch (networkError) {
                 responseOutput.classList.add("error");
                 responseOutput.textContent = `Network/CORS Error: Could not connect to the API server.\n\nDetails: ${networkError.message}`;
             } finally {
-                // Re-enable the button
                 submitBtn.disabled = false;
             }
         }
