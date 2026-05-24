@@ -7,13 +7,30 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            max-width: 800px;
+            max-width: 1200px; /* Increased to comfortably fit two columns */
             margin: 40px auto;
             padding: 0 20px;
             background-color: #f9f9f9;
             color: #333;
         }
         h2 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        /* Layout wrapper for side-by-side forms */
+        .columns-wrapper {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+        }
+        
+        /* Individual Form Column */
+        .form-column {
+            flex: 1;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
         .container { display: flex; flex-direction: column; gap: 20px; }
         .form-group { display: flex; flex-direction: column; gap: 8px; }
         label { font-weight: bold; color: #555; }
@@ -29,71 +46,179 @@
         button:hover { background-color: #0056b3; }
         button:disabled { background-color: #cccccc; cursor: not-allowed; }
         .response-box {
-            min-height: 100px; max-height: 400px; overflow-y: auto;
+            min-height: 400px; max-height: 800px; overflow-y: auto;
             background-color: #282c34; color: #abb2bf; padding: 15px;
             border-radius: 4px; font-family: monospace; white-space: pre-wrap;
             word-break: break-all; border: 1px solid #181a1f;
         }
+        #responseOutput1.response-box {
+            min-height: 400px; max-height: 800px;
+        }
         .error { color: #ff6b6b; background-color: #fce8e6; border: 1px solid #ff6b6b; }
         .success { border-left: 5px solid #28a745; }
+
+        /* Responsive adjustment for small screens */
+        @media (max-width: 768px) {
+            .columns-wrapper {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
 
     <h2>Fraud Prediction API Test Client</h2>
+
+    <ol class="underlined-list">
+        <li>Copy a row from Kaggle's credit card fraud detection dataset: https://github.com/psundaravadivel/Credit-Card-Fraud-Detection/blob/main/CreditcardDataset.csv?plain=1 </li>
+        <li>Paste that row in the CSV payload</li>
+        <li>Click "Send CSV to Dictionary Request"</li>
+        <li>In the "Dictionary Response" copy only the dict object from the "data" array</li>
+        <li>Paste in the "JSON Payload"</li>
+        <li>Prediction can be seen in the "Fraud Prediction Response" box</li>
+    </ol>
     
-    <div class="container">
-        <div class="form-group">
-            <label for="payloadInput">JSON Payload:</label>
-            <textarea id="payloadInput">{
-    "Time": 0.0,
-    "V1": 1.191857111,
-    "V2": 0.266150712,
-    "V3": 0.166480113,
-    "V4": 0.448154078,
-    "V5": 0.060017649,
-    "V6": -0.082360809,
-    "V7": -0.078802983,
-    "V8": 0.085101655,
-    "V9": -0.255425128,
-    "V10": -0.166974414,
-    "V11": 1.612726661,
-    "V12": 1.065235311,
-    "V13": 0.489095016,
-    "V14": -0.143772296,
-    "V15": 0.635558093,
-    "V16": 0.463917041,
-    "V17": -0.114804663,
-    "V18": -0.18336127,
-    "V19": -0.145783041,
-    "V20": -0.069083135,
-    "V21": -0.225775248,
-    "V22": -0.638671953,
-    "V23": 0.101288021,
-    "V24": -0.339846476,
-    "V25": 0.167170404,
-    "V26": 0.125894532,
-    "V27": -0.008983099,
-    "V28": 0.014724169,
-    "Amount": 2.69,
-    "Class": 0.0
-}</textarea>
+    <div class="columns-wrapper">
+        
+        <div class="form-column">
+            <h3>Convert csv row to python dictionary</h3>
+            <div class="container">
+                <div class="form-group">
+                    <label for="payloadInput1">CSV Payload:</label>
+                    <textarea id="payloadInput1">
+                        Time,V1,V2,V3,V4,V5,V6,V7,V8,V9,V10,V11,V12,V13,V14,V15,V16,V17,V18,V19,V20,V21,V22,V23,V24,V25,V26,V27,V28,Amount,Class
+                        0.0,-1.359807134,-0.072781173,2.536346738,1.378155224,-0.33832077,0.462387778,0.239598554,0.098697901,0.36378697,0.090794172,-0.551599533,-0.617800856,-0.991389847,-0.311169354,1.468176972,-0.470400525,0.207971242,0.02579058,0.40399296,0.251412098,-0.018306778,0.277837576,-0.11047391,0.066928075,0.128539358,-0.189114844,0.133558377,-0.021053053,149.62,0
+                    </textarea>
+                </div>
+
+                <button id="submitBtn1" onclick="sendCsvToDictRequest(1)">Send CSV to Dictionary Request</button>
+
+                <div class="form-group">
+                    <label>Dictionary Response:</label>
+                    <div id="responseOutput1" class="response-box">The API response will appear here after you click the button.</div>
+                </div>
+            </div>
         </div>
 
-        <button id="submitBtn" onclick="sendPredictionRequest()">Send POST Request</button>
+        <div class="form-column">
+            <h3>Fraud Prediction </h3>
+            <div class="container">
+                <div class="form-group">
+                    <label for="payloadInput2">JSON Payload (omit the "Class" column):</label>
+                    <textarea id="payloadInput2">{
+                        "Time": 0.0,
+                        "V1": 1.191857111,
+                        "V2": 0.266150712,
+                        "V3": 0.166480113,
+                        "V4": 0.448154078,
+                        "V5": 0.060017649,
+                        "V6": -0.082360809,
+                        "V7": -0.078802983,
+                        "V8": 0.085101655,
+                        "V9": -0.255425128,
+                        "V10": -0.166974414,
+                        "V11": 1.612726661,
+                        "V12": 1.065235311,
+                        "V13": 0.489095016,
+                        "V14": -0.143772296,
+                        "V15": 0.635558093,
+                        "V16": 0.463917041,
+                        "V17": -0.114804663,
+                        "V18": -0.18336127,
+                        "V19": -0.145783041,
+                        "V20": -0.069083135,
+                        "V21": -0.225775248,
+                        "V22": -0.638671953,
+                        "V23": 0.101288021,
+                        "V24": -0.339846476,
+                        "V25": 0.167170404,
+                        "V26": 0.125894532,
+                        "V27": -0.008983099,
+                        "V28": 0.014724169,
+                        "Amount": 2.69,
+                        "Class": 0.0
+                    }</textarea>
+                </div>
 
-        <div class="form-group">
-            <label>API Response:</label>
-            <div id="responseOutput" class="response-box">The API response will appear here after you click the button.</div>
+                <button id="submitBtn2" onclick="sendPredictionRequest(2)">Send Fraud Prediction Request</button>
+
+                <div class="form-group">
+                    <label>Fraud Prediction Response:</label>
+                    <div id="responseOutput2" class="response-box">The API response will appear here after you click the button.</div>
+                </div>
+            </div>
         </div>
+
     </div>
 
     <script>
-        async function sendPredictionRequest() {
+        async function sendCsvToDictRequest() {
+            const endpoint = "http://localhost:8000/v1/dict-from-string";
+            
+            // Target elements dynamically based on the passed instance ID (1 or 2)
+            const payloadTextArea = document.getElementById(`payloadInput1`);
+            const responseOutput = document.getElementById(`responseOutput1`);
+            const submitBtn = document.getElementById(`submitBtn1`);
+
+            responseOutput.classList.remove("error", "success");
+            responseOutput.textContent = "Sending request...";
+            submitBtn.disabled = true;
+            console.log('==================================');
+            console.log(payloadTextArea.value);
+            const cleanValue = payloadTextArea.value
+                                .split(/\r?\n|\r/g)                 // Splits on standard, Windows, and Mac line breaks
+                                .map(line => line.replace(/[\s\xa0]+/g, ' ').trim()) // Replaces hidden non-breaking spaces
+                                .filter(line => line.length > 0)    // Drops the line if nothing is left
+                                .join("\n");
+            console.log('++++++++++++++++++++++++++++++++++');
+            console.log(cleanValue);
+            payloadTextArea.value = cleanValue;
+
+            /*let parsedPayload;
+            try {
+                parsedPayload = JSON.parse(payloadTextArea.value);
+            } catch (jsonError) {
+                responseOutput.classList.add("error");
+                responseOutput.textContent = `Local Validation Error: Invalid JSON Format.\n\n${jsonError.message}`;
+                submitBtn.disabled = false;
+                return;
+            }*/
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                    body: cleanValue
+                });
+
+                const responseText = await response.text();
+                
+                if (response.ok) {
+                    responseOutput.classList.add("success");
+                    try {
+                        responseOutput.textContent = JSON.stringify(JSON.parse(responseText), null, 4);
+                    } catch {
+                        responseOutput.textContent = `Status: ${response.status}\n\n${responseText}`;
+                    }
+                } else {
+                    responseOutput.classList.add("error");
+                    responseOutput.textContent = `Server Error (Status ${response.status}):\n\n${responseText}`;
+                }
+            } catch (networkError) {
+                responseOutput.classList.add("error");
+                responseOutput.textContent = `Network/CORS Error: Could not connect to the API server.\n\nDetails: ${networkError.message}`;
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function sendPredictionRequest(instanceId) {
             const endpoint = "http://localhost:8000/v1/predict";
-            const payloadTextArea = document.getElementById("payloadInput");
-            const responseOutput = document.getElementById("responseOutput");
-            const submitBtn = document.getElementById("submitBtn");
+            
+            // Target elements dynamically based on the passed instance ID (1 or 2)
+            const payloadTextArea = document.getElementById(`payloadInput${instanceId}`);
+            const responseOutput = document.getElementById(`responseOutput${instanceId}`);
+            const submitBtn = document.getElementById(`submitBtn${instanceId}`);
 
             responseOutput.classList.remove("error", "success");
             responseOutput.textContent = "Sending request...";
