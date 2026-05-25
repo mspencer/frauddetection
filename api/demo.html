@@ -41,15 +41,22 @@
 <body>
     <h2>Fraud Prediction API Test Client</h2>
     <div class="container">
+        <ol>
+            <li>Copy a row from Kaggle's credit card fraud detection dataset: https://github.com/psundaravadivel/Credit-Card-Fraud-Detection/blob/main/CreditcardDataset.csv?plain=1</li>
+            <li>Paste that row in the CSV text/plain Payload</li>
+            <li>Click "Text Conversion" button. Obseve the python dictionary response in "CSV to Dictionary Response"</li>
+            <li>Click "Fraud Prediction" button. Obseve the python dictionary response in "Fraud Prediction Response"</li>
+        </ol>
         <div class="form-group">
-            <label for="payloadInput">JSON Payload:</label>
+            <label for="payloadInput">CSV text/plain Payload:</label>
             <textarea id="payloadInput">0.0,-1.359807134,-0.072781173,2.536346738,1.378155224,-0.33832077,0.462387778,0.239598554,0.098697901,0.36378697,0.090794172,-0.551599533,-0.617800856,-0.991389847,-0.311169354,1.468176972,-0.470400525,0.207971242,0.02579058,0.40399296,0.251412098,-0.018306778,0.277837576,-0.11047391,0.066928075,0.128539358,-0.189114844,0.133558377,-0.021053053,149.62,0</textarea>
         </div>
         <button id="submitBtn1" onclick="sendCsvToDictRequest()">Text Conversion</button>
         <button id="submitBtn2" onclick="sendPredictionRequest()">Fraud Prediction</button>
         <div class="form-group">
-            <label>API Response:</label>
+            <label>Fraud Prediction Response:</label>
             <div id="responseOutput2" class="response-box">The API response will appear here after you click the Fraud Prediction button.</div>
+            <label>CSV to Dictionary Response</label>
             <div id="responseOutput1" class="response-box">The API response will appear here after you click the Text Conversion button.</div>
         </div>
     </div>
