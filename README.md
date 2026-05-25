@@ -13,9 +13,15 @@
 
 ---------------------------
 
-
-
-## 🛠 Model Training & Artifacts
+## Model Training & Artifacts
+1. Use Kaggle's Credit Card Fraud Detection dataset: 
+   https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud?resource=download
+2. Compare the fraud prediction performance between:
+   LogisticRegression,
+   RandomForestClassifier,
+   HistGradientBoostingClassifier,
+   XGBClassifier
+3. Evaluate using F1 Score and PR-AUC. Select XGBClassifier as a model to serve the API
 
 ### Where Artifacts Go
 The production API requires two files inside the `api/` directory:
@@ -29,3 +35,15 @@ When training a new model version:
    ```python
    import joblib
    joblib.dump(trained_model, "api/model.joblib")
+
+### Build the RESTful API Server
+FastAPI server with Pydantic to validate the payload
+
+### Deployment
+Deployed to Google Cloud Run
+
+### Postman
+1. Convert CSV to Json
+   ![Postman convert csv to json screenshot](./convert-to-json.png)
+2. Predict
+   ![Postman predict if is fradulent](./predict.png)
