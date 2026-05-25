@@ -110,3 +110,9 @@ async def serve_index():
     # Looks for 'index.html' in the same folder as main.py
     file_path = _BASE / "test.html"
     return FileResponse(file_path)
+
+@app.get("/demo")
+async def serve_index():
+    # Looks for 'index.html' in the same folder as main.py
+    file_path = _BASE / "demo.html"
+    return FileResponse(file_path)

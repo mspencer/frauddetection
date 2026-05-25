@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Prediction Client</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h2 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .container { display: flex; flex-direction: column; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-weight: bold; color: #555; }
+        textarea {
+            width: 100%; height: 160px; font-family: monospace; font-size: 14px;
+            padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
+        }
+        button {
+            padding: 12px 24px; font-size: 16px; font-weight: bold; color: white;
+            background-color: #007bff; border: none; border-radius: 4px; cursor: pointer;
+            align-self: flex-start;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .response-box {
+            min-height: 100px; max-height: 400px; overflow-y: auto;
+            background-color: #282c34; color: #abb2bf; padding: 15px;
+            border-radius: 4px; font-family: monospace; white-space: pre-wrap;
+            word-break: break-all; border: 1px solid #181a1f;
+        }
+        .error { color: #ff6b6b; background-color: #fce8e6; border: 1px solid #ff6b6b; }
+        .success { border-left: 5px solid #28a745; }
+    </style>
+</head>
+<body>
+    <h2>Fraud Prediction API Test Client</h2>
+    <div class="container">
+        <div class="form-group">
+            <label for="payloadInput">JSON Payload:</label>
+            <textarea id="payloadInput">0.0,-1.359807134,-0.072781173,2.536346738,1.378155224,-0.33832077,0.462387778,0.239598554,0.098697901,0.36378697,0.090794172,-0.551599533,-0.617800856,-0.991389847,-0.311169354,1.468176972,-0.470400525,0.207971242,0.02579058,0.40399296,0.251412098,-0.018306778,0.277837576,-0.11047391,0.066928075,0.128539358,-0.189114844,0.133558377,-0.021053053,149.62,0</textarea>
+        </div>
+        <button id="submitBtn1" onclick="sendCsvToDictRequest()">Text Conversion</button>
+        <button id="submitBtn2" onclick="sendPredictionRequest()">Fraud Prediction</button>
+        <div class="form-group">
+            <label>API Response:</label>
+            <div id="responseOutput2" class="response-box">The API response will appear here after you click the Fraud Prediction button.</div>
+            <div id="responseOutput1" class="response-box">The API response will appear here after you click the Text Conversion button.</div>
+        </div>
+    </div>
+    <script>
+        const columnHeaders = "Time,V1,V2,V3,V4,V5,V6,V7,V8,V9,V10,V11,V12,V13,V14,V15,V16,V17,V18,V19,V20,V21,V22,V23,V24,V25,V26,V27,V28,Amount,Class";
+        let jsonPayload = undefined;
+        async function sendCsvToDictRequest() {
+            const endpoint = "http://localhost:8000/v1/dict-from-string";
+            
+            // Target elements dynamically based on the passed instance ID (1 or 2)
+            const payloadTextArea = document.getElementById(`payloadInput`);
+            const responseOutput = document.getElementById(`responseOutput1`);
+            const submitBtn = document.getElementById(`submitBtn1`);
+
+            responseOutput.classList.remove("error", "success");
+            responseOutput.textContent = "Sending request...";
+            submitBtn.disabled = true;
+            console.log('==================================');
+            console.log(payloadTextArea.value);
+            const cleanValue = payloadTextArea.value
+                                .split(/\r?\n|\r/g)                 // Splits on standard, Windows, and Mac line breaks
+                                .map(line => line.replace(/[\s\xa0]+/g, ' ').trim()) // Replaces hidden non-breaking spaces
+                                .filter(line => line.length > 0)    // Drops the line if nothing is left
+                                .join("\n");
+            console.log('++++++++++++++++++++++++++++++++++');
+            console.log(cleanValue);
+
+            const payloadToSend = columnHeaders+"\n"+cleanValue;
+            console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
+            console.log(payloadToSend);
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                    body: payloadToSend
+                });
+
+                const responseText = await response.text();
+                
+                if (response.ok) {
+                    responseOutput.classList.add("success");
+                    try {
+                        responseOutput.textContent = JSON.stringify(JSON.parse(responseText), null, 4);
+                        jsonPayload = JSON.parse(responseText);
+                        jsonPayload = jsonPayload.data[0];
+                    } catch {
+                        responseOutput.textContent = `Status: ${response.status}\n\n${responseText}`;
+                        jsonPayload = undefined;
+                    }
+                } else {
+                    responseOutput.classList.add("error");
+                    responseOutput.textContent = `Server Error (Status ${response.status}):\n\n${responseText}`;
+                    jsonPayload = undefined;
+                }
+            } catch (networkError) {
+                responseOutput.classList.add("error");
+                responseOutput.textContent = `Network/CORS Error: Could not connect to the API server.\n\nDetails: ${networkError.message}`;
+                jsonPayload = undefined;
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function sendPredictionRequest() {
+            const endpoint = "http://localhost:8000/v1/predict";
+            //const payloadTextArea = document.getElementById("payloadInput");
+            const responseOutput = document.getElementById("responseOutput2");
+            const submitBtn = document.getElementById("submitBtn2");
+            responseOutput.classList.remove("error", "success");
+            responseOutput.textContent = "Sending request...";
+            submitBtn.disabled = true;
+            let parsedPayload;
+            /*try {
+                parsedPayload = JSON.parse(jsonPayload);
+            } catch (jsonError) {
+                responseOutput.classList.add("error");
+                responseOutput.textContent = `Local Validation Error: Invalid JSON Format.\n\n${jsonError.message}`;
+                submitBtn.disabled = false;
+                return;
+            }*/
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(jsonPayload)
+                });
+                const responseText = await response.text();
+                if (response.ok) {
+                    responseOutput.classList.add("success");
+                    try {
+                        responseOutput.textContent = JSON.stringify(JSON.parse(responseText), null, 4);
+                    } catch {
+                        responseOutput.textContent = `Status: ${response.status}\n\n${responseText}`;
+                    }
+                } else {
+                    responseOutput.classList.add("error");
+                    responseOutput.textContent = `Server Error (Status ${response.status}):\n\n${responseText}`;
+                }
+            } catch (networkError) {
+                responseOutput.classList.add("error");
+                responseOutput.textContent = `Network/CORS Error: Could not connect to the API server.\n\nDetails: ${networkError.message}`;
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
