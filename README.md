@@ -1,8 +1,19 @@
-# Credit Card Fraud Detection API
+# Credit Card Fraud Prediction API
+## Personal project
 
-A lightweight FastAPI service designed to take raw CSV input rows, parse them into a structured key-value array, and pass them to a pre-trained scikit-learn model for fraud prediction.
+## Project description
+1. For Fraud Prediction API, the input and output are Json object 
+   https://fraud-prediction-service-326503800116.europe-west2.run.app/v1/predict
+2. Offer an utility API, to convert CSV to Json object which can be passed on to the Prediction API
+   https://fraud-prediction-service-326503800116.europe-west2.run.app/v1/dict-from-string
+3. Demo page for easy demonstration of how both of the APIs can be used
+   https://fraud-prediction-service-326503800116.europe-west2.run.app/demo
+4. Service health check endpoint
+   https://fraud-prediction-service-326503800116.europe-west2.run.app/health
 
----
+---------------------------
+
+
 
 ## 🛠 Model Training & Artifacts
 
