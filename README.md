@@ -13,7 +13,7 @@
 
 ---------------------------
 
-## Model Training & Artifacts
+## Model Training & Artifacts & Deployment
 1. Use Kaggle's Credit Card Fraud Detection dataset:  
    https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud?resource=download
 2. Compare the fraud prediction performance between:
