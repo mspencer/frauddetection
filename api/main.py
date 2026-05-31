@@ -83,7 +83,7 @@ def build_dict_from_string(
         if row_count > MAX_ROWS_ALLOWED:
             raise HTTPException(
                 status_code=status.HTTP_413_CONTENT_TOO_LARGE,
-                details=f"Payload too large. Maximu allowed rows is {MAX_ROWS_ALLOWED}."
+                details=f"Payload too large. Maximum allowed rows is {MAX_ROWS_ALLOWED}."
             )
         
         # append row to the dict_response
